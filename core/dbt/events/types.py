@@ -2254,11 +2254,7 @@ class InternalExceptionOnRun(DebugLevel, pt.InternalExceptionOnRun):
 the error persists, open an issue at https://github.com/dbt-labs/dbt-core
 """.strip()
 
-        return (
-            f"{red(prefix)}\n"
-            f"{str(self.exc).strip()}\n\n"
-            f"{internal_error_string}"
-        )
+        return f"{red(prefix)}\n" f"{str(self.exc).strip()}\n\n" f"{internal_error_string}"
 
 
 @dataclass
