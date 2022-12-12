@@ -100,8 +100,11 @@ First make sure that you set up your `virtualenv` as described in [Setting up an
 
 ```sh
 make dev
-# or
+```
+or, alternatively:
+```sh
 pip install -r dev-requirements.txt -r editable-requirements.txt
+pre-commit install
 ```
 
 When installed in this way, any changes you make to your local copy of the source code will be reflected immediately in your next `dbt` run.
