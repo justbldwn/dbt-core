@@ -210,6 +210,8 @@ class FreshnessThreshold(dbtClassMixin, Mergeable):
             return FreshnessStatus.Pass
 
     def format_age(self, age):
+        # if `age`` is > 1 day, timedelta(seconds=) default format is x day(s), HH:MM:SS
+        # if `age` is < 1 day, timedelta(seconds=) default format is HH:MM:SS
         timedelta_age = str(timedelta(seconds=age)).split(", ")
         days = None
 
@@ -221,22 +223,12 @@ class FreshnessThreshold(dbtClassMixin, Mergeable):
             hours, minutes, seconds = timedelta_age[0].split(":")
 
         if days:
-            age_pretty = f"{days}, {hours} hours, {minutes} minutes, {seconds} seconds"
+            age_pretty = (
+                f"{days}, {int(hours)} hours, {int(minutes)} minutes, {float(seconds)} seconds"
+            )
 
         else:
-            age_pretty = f"{hours} hours, {minutes} minutes, {seconds} seconds"
-
-        # if ", " in str(timedelta_age):
-        #     split_age = str(timedelta_age).split(", ")
-
-        # if timedelta_age.days > 0:
-        #     age_split = str(timedelta_age).split(", ")
-        #     age_time_split = age_split[1].split(":")
-        #     age_pretty = f"{age_split[0]}, {age_time_split[0]} hours, {age_time_split[1]} minutes, {age_time_split[2]} seconds"
-
-        # else:
-        #     split_age_time = str(timedelta_age).split(":")
-        #     age_pretty = f"{split_age_time[0]} hours, {split_age_time[1]} minutes, {split_age_time[2]} seconds"
+            age_pretty = f"{int(hours)} hours, {int(minutes)} minutes, {float(seconds)} seconds"
 
         return age_pretty
 
@@ -251,6 +243,7 @@ class FreshnessThreshold(dbtClassMixin, Mergeable):
             expected = self.error_after.human_friendly()
         elif self.status(age) == FreshnessStatus.Warn:
             expected = self.warn_after.human_friendly()
+
         if expected:
             return f"Last updated {age_pretty} ago. Expected no more than {expected}."
         else:
