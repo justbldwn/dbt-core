@@ -210,7 +210,7 @@ class FreshnessThreshold(dbtClassMixin, Mergeable):
             return FreshnessStatus.Pass
 
     def format_age(self, age):
-        # if `age`` is > 1 day, timedelta(seconds=) default format is x day(s), HH:MM:SS
+        # if `age` is > 1 day, timedelta(seconds=) default format is x day(s), HH:MM:SS
         # if `age` is < 1 day, timedelta(seconds=) default format is HH:MM:SS
         timedelta_age = str(timedelta(seconds=age)).split(", ")
         days = None
