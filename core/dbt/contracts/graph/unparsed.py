@@ -222,13 +222,15 @@ class FreshnessThreshold(dbtClassMixin, Mergeable):
         else:
             hours, minutes, seconds = timedelta_age[0].split(":")
 
+        hours = f"{int(hours)} hour" + ("s" if int(hours) != 1 else "")
+        minutes = f"{int(minutes)} minute" + ("s" if int(minutes) != 1 else "")
+        seconds = f"{float(seconds)} second" + ("s" if float(seconds) != 1.0 else "")
+
         if days:
-            age_pretty = (
-                f"{days}, {int(hours)} hours, {int(minutes)} minutes, {float(seconds)} seconds"
-            )
+            age_pretty = f"{days}, {hours}, {minutes}, {seconds}"
 
         else:
-            age_pretty = f"{int(hours)} hours, {int(minutes)} minutes, {float(seconds)} seconds"
+            age_pretty = f"{hours}, {minutes}, {seconds}"
 
         return age_pretty
 
