@@ -195,8 +195,8 @@ class Time(dbtClassMixin, Mergeable):
 
 @dataclass
 class FreshnessThreshold(dbtClassMixin, Mergeable):
-    warn_after: Time = field(default_factory=Time)
-    error_after: Time = field(default_factory=Time)
+    warn_after: Optional[Time] = field(default_factory=Time)
+    error_after: Optional[Time] = field(default_factory=Time)
     filter: Optional[str] = None
 
     def status(self, age: float) -> "dbt.contracts.results.FreshnessStatus":
@@ -239,9 +239,9 @@ class FreshnessThreshold(dbtClassMixin, Mergeable):
         age_pretty = self.format_age(age)
         expected = None
 
-        if self.status(age) == FreshnessStatus.Error:
+        if self.status(age) == FreshnessStatus.Error and self.error_after:
             expected = self.error_after.human_friendly()
-        elif self.status(age) == FreshnessStatus.Warn:
+        elif self.status(age) == FreshnessStatus.Warn and self.warn_after:
             expected = self.warn_after.human_friendly()
 
         if expected:
