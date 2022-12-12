@@ -20,10 +20,15 @@ CI_FLAGS =\
 	DBT_LOG_FORMAT=json
 
 .PHONY: dev
-dev: ## Installs dbt-* packages in develop mode along with development dependencies.
+dev: ## Installs dbt-* packages in develop mode along with development dependencies and pre-commit.
 	@\
 	pip install -r dev-requirements.txt -r editable-requirements.txt && \
 	pre-commit install
+
+.PHONY: dev_req
+dev_req: ## Installs dbt-* packages in develop mode along with only development dependencies.
+	@\
+	pip install -r dev-requirements.txt -r editable-requirements.txt
 
 .PHONY: mypy
 mypy: .env ## Runs mypy against staged changes for static type checking.
