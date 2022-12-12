@@ -195,8 +195,8 @@ class Time(dbtClassMixin, Mergeable):
 
 @dataclass
 class FreshnessThreshold(dbtClassMixin, Mergeable):
-    warn_after: Optional[Time] = field(default_factory=Time)
-    error_after: Optional[Time] = field(default_factory=Time)
+    warn_after: Time = field(default_factory=Time)
+    error_after: Time = field(default_factory=Time)
     filter: Optional[str] = None
 
     def status(self, age: float) -> "dbt.contracts.results.FreshnessStatus":
@@ -209,12 +209,44 @@ class FreshnessThreshold(dbtClassMixin, Mergeable):
         else:
             return FreshnessStatus.Pass
 
+    def format_age(self, age):
+        timedelta_age = str(timedelta(seconds=age)).split(", ")
+        days = None
+
+        if len(timedelta_age) > 1:
+            days = timedelta_age[0]
+            hours, minutes, seconds = timedelta_age[1].split(":")
+
+        else:
+            hours, minutes, seconds = timedelta_age[0].split(":")
+
+        if days:
+            age_pretty = f"{days}, {hours} hours, {minutes} minutes, {seconds} seconds"
+
+        else:
+            age_pretty = f"{hours} hours, {minutes} minutes, {seconds} seconds"
+
+        # if ", " in str(timedelta_age):
+        #     split_age = str(timedelta_age).split(", ")
+
+        # if timedelta_age.days > 0:
+        #     age_split = str(timedelta_age).split(", ")
+        #     age_time_split = age_split[1].split(":")
+        #     age_pretty = f"{age_split[0]}, {age_time_split[0]} hours, {age_time_split[1]} minutes, {age_time_split[2]} seconds"
+
+        # else:
+        #     split_age_time = str(timedelta_age).split(":")
+        #     age_pretty = f"{split_age_time[0]} hours, {split_age_time[1]} minutes, {split_age_time[2]} seconds"
+
+        return age_pretty
+
     # human-readable message for artifacts & logs, including end-of-freshness check summary
     def message(self, age: float) -> Optional[str]:
         from dbt.contracts.results import FreshnessStatus
 
-        age_pretty = str(timedelta(seconds=age))
+        age_pretty = self.format_age(age)
         expected = None
+
         if self.status(age) == FreshnessStatus.Error:
             expected = self.error_after.human_friendly()
         elif self.status(age) == FreshnessStatus.Warn:

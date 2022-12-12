@@ -2518,7 +2518,7 @@ class RunResultError(ErrorLevel, EventStringFunctor, pt.RunResultError):
 
     def message(self) -> str:
         # This is the message on the result object, cannot be built here
-        return f"  {self.msg}"
+        return f"{self.msg}"
 
 
 @dataclass
