@@ -355,7 +355,6 @@ sample_values = [
 
     RunningOperationCaughtError(exc=""),
     CompileComplete(),
-    FreshnessCheckComplete(),
     SeedHeader(header=""),
     SeedHeaderSeparator(len_header=0),
     SQLRunnerException(exc=""),
