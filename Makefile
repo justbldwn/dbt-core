@@ -19,11 +19,12 @@ CI_FLAGS =\
 	LOG_DIR=./logs\
 	DBT_LOG_FORMAT=json
 
-.PHONY: dev
+.PHONY: dev_req
 dev_req: ## Installs dbt-* packages in develop mode along with only development dependencies.
 	@\
 	pip install -r dev-requirements.txt -r editable-requirements.txt
 
+.PHONY: dev
 dev: dev_req ## Installs dbt-* packages in develop mode along with development dependencies and pre-commit.
 	@\
 	pre-commit install
