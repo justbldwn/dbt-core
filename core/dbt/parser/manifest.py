@@ -62,17 +62,16 @@ from dbt.contracts.graph.manifest import (
 )
 from dbt.contracts.graph.nodes import (
     SourceDefinition,
-    ParsedNode,
     Macro,
     ColumnInfo,
     Exposure,
     Metric,
+    SeedNode,
     ManifestNode,
+    ResultNode,
 )
 from dbt.contracts.util import Writable
-from dbt.exceptions import (
-    target_not_found,
-)
+from dbt.exceptions import TargetNotFound, AmbiguousAlias
 from dbt.parser.base import Parser
 from dbt.parser.analysis import AnalysisParser
 from dbt.parser.generic_test import GenericTestParser
@@ -988,7 +987,7 @@ def invalid_target_fail_unless_test(
                 )
             )
     else:
-        target_not_found(
+        raise TargetNotFound(
             node=node,
             target_name=target_name,
             target_kind=target_kind,
@@ -1016,11 +1015,11 @@ def _check_resource_uniqueness(
 
         existing_node = names_resources.get(name)
         if existing_node is not None:
-            dbt.exceptions.raise_duplicate_resource_name(existing_node, node)
+            raise dbt.exceptions.DuplicateResourceName(existing_node, node)
 
         existing_alias = alias_resources.get(full_node_name)
         if existing_alias is not None:
-            dbt.exceptions.raise_ambiguous_alias(existing_alias, node, full_node_name)
+            raise AmbiguousAlias(node_1=existing_alias, node_2=node, duped_name=full_node_name)
 
         names_resources[name] = node
         alias_resources[full_node_name] = node
@@ -1040,7 +1039,7 @@ def _check_manifest(manifest: Manifest, config: RuntimeConfig) -> None:
 
 
 def _get_node_column(node, column_name):
-    """Given a ParsedNode, add some fields that might be missing. Return a
+    """Given a ManifestNode, add some fields that might be missing. Return a
     reference to the dict that refers to the given column, creating it if
     it doesn't yet exist.
     """
@@ -1053,7 +1052,7 @@ def _get_node_column(node, column_name):
     return column
 
 
-DocsContextCallback = Callable[[Union[ParsedNode, SourceDefinition]], Dict[str, Any]]
+DocsContextCallback = Callable[[ResultNode], Dict[str, Any]]
 
 
 # node and column descriptions
@@ -1191,6 +1190,10 @@ def _process_metrics_for_node(
     node: Union[ManifestNode, Metric, Exposure],
 ):
     """Given a manifest and a node in that manifest, process its metrics"""
+
+    if isinstance(node, SeedNode):
+        return
+
     for metric in node.metrics:
         target_metric: Optional[Union[Disabled, Metric]] = None
         target_metric_name: str
@@ -1232,6 +1235,10 @@ def _process_metrics_for_node(
 
 def _process_refs_for_node(manifest: Manifest, current_project: str, node: ManifestNode):
     """Given a manifest and a node in that manifest, process its refs"""
+
+    if isinstance(node, SeedNode):
+        return
+
     for ref in node.refs:
         target_model: Optional[Union[Disabled, ManifestNode]] = None
         target_model_name: str
@@ -1323,6 +1330,10 @@ def _process_sources_for_metric(manifest: Manifest, current_project: str, metric
 
 
 def _process_sources_for_node(manifest: Manifest, current_project: str, node: ManifestNode):
+
+    if isinstance(node, SeedNode):
+        return
+
     target_source: Optional[Union[Disabled, SourceDefinition]] = None
     for source_name, table_name in node.sources:
         target_source = manifest.resolve_source(
