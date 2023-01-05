@@ -14,9 +14,9 @@ from dbt.events.base_types import (
 )
 from dbt.events.format import format_fancy_output_line, pluralize
 
-# The generated classes quote the included message classes, requiring the following line
+# The generated classes quote the included message classes, requiring the following lines
 from dbt.events.proto_types import EventInfo, RunResultMsg, ListOfStrings  # noqa
-from dbt.events.proto_types import NodeInfo, ReferenceKeyMsg  # noqa
+from dbt.events.proto_types import NodeInfo, ReferenceKeyMsg, TimingInfoMsg  # noqa
 from dbt.events import proto_types as pt
 
 from dbt.node_types import NodeType
@@ -975,19 +975,11 @@ class MacroFileParse(DebugLevel, pt.MacroFileParse):
         return f"Parsing {self.path}"
 
 
-@dataclass
-class PartialParsingFullReparseBecauseOfError(
-    InfoLevel, pt.PartialParsingFullReparseBecauseOfError
-):
-    def code(self):
-        return "I013"
-
-    def message(self) -> str:
-        return "Partial parsing enabled but an error occurred. Switching to a full re-parse."
+# Skipping I013
 
 
 @dataclass
-class PartialParsingExceptionFile(DebugLevel, pt.PartialParsingExceptionFile):
+class PartialParsingExceptionProcessingFile(DebugLevel, pt.PartialParsingExceptionProcessingFile):
     def code(self):
         return "I014"
 
@@ -995,13 +987,7 @@ class PartialParsingExceptionFile(DebugLevel, pt.PartialParsingExceptionFile):
         return f"Partial parsing exception processing file {self.file}"
 
 
-@dataclass
-class PartialParsingFile(DebugLevel, pt.PartialParsingFile):
-    def code(self):
-        return "I015"
-
-    def message(self) -> str:
-        return f"PP file: {self.file_id}"
+# Skipped I015
 
 
 @dataclass
@@ -1022,112 +1008,19 @@ class PartialParsingSkipParsing(DebugLevel, pt.PartialParsingSkipParsing):
         return "Partial parsing enabled, no changes found, skipping parsing"
 
 
-@dataclass
-class PartialParsingMacroChangeStartFullParse(
-    InfoLevel, pt.PartialParsingMacroChangeStartFullParse
-):
-    def code(self):
-        return "I018"
-
-    def message(self) -> str:
-        return "Change detected to override macro used during parsing. Starting full parse."
+# Skipped I018, I019, I020, I021, I022, I023
 
 
 @dataclass
-class PartialParsingProjectEnvVarsChanged(InfoLevel, pt.PartialParsingProjectEnvVarsChanged):
-    def code(self):
-        return "I019"
-
-    def message(self) -> str:
-        return "Unable to do partial parsing because env vars used in dbt_project.yml have changed"
-
-
-@dataclass
-class PartialParsingProfileEnvVarsChanged(InfoLevel, pt.PartialParsingProfileEnvVarsChanged):
-    def code(self):
-        return "I020"
-
-    def message(self) -> str:
-        return "Unable to do partial parsing because env vars used in profiles.yml have changed"
-
-
-@dataclass
-class PartialParsingDeletedMetric(DebugLevel, pt.PartialParsingDeletedMetric):
-    def code(self):
-        return "I021"
-
-    def message(self) -> str:
-        return f"Partial parsing: deleted metric {self.unique_id}"
-
-
-@dataclass
-class ManifestWrongMetadataVersion(DebugLevel, pt.ManifestWrongMetadataVersion):
-    def code(self):
-        return "I022"
-
-    def message(self) -> str:
-        return (
-            "Manifest metadata did not contain correct version. "
-            f"Contained '{self.version}' instead."
-        )
-
-
-@dataclass
-class PartialParsingVersionMismatch(InfoLevel, pt.PartialParsingVersionMismatch):
-    def code(self):
-        return "I023"
-
-    def message(self) -> str:
-        return (
-            "Unable to do partial parsing because of a dbt version mismatch. "
-            f"Saved manifest version: {self.saved_version}. "
-            f"Current version: {self.current_version}."
-        )
-
-
-@dataclass
-class PartialParsingFailedBecauseConfigChange(
-    InfoLevel, pt.PartialParsingFailedBecauseConfigChange
-):
+class UnableToPartialParse(InfoLevel, pt.UnableToPartialParse):
     def code(self):
         return "I024"
 
     def message(self) -> str:
-        return (
-            "Unable to do partial parsing because config vars, "
-            "config profile, or config target have changed"
-        )
+        return f"Unable to do partial parsing because {self.reason}"
 
 
-@dataclass
-class PartialParsingFailedBecauseProfileChange(
-    InfoLevel, pt.PartialParsingFailedBecauseProfileChange
-):
-    def code(self):
-        return "I025"
-
-    def message(self) -> str:
-        return "Unable to do partial parsing because profile has changed"
-
-
-@dataclass
-class PartialParsingFailedBecauseNewProjectDependency(
-    InfoLevel, pt.PartialParsingFailedBecauseNewProjectDependency
-):
-    def code(self):
-        return "I026"
-
-    def message(self) -> str:
-        return "Unable to do partial parsing because a project dependency has been added"
-
-
-@dataclass
-class PartialParsingFailedBecauseHashChanged(InfoLevel, pt.PartialParsingFailedBecauseHashChanged):
-    def code(self):
-        return "I027"
-
-    def message(self) -> str:
-        return "Unable to do partial parsing because a project config has changed"
+# Skipped I025, I026, I026, I027
 
 
 @dataclass
@@ -1148,13 +1041,7 @@ class ParsedFileLoadFailed(DebugLevel, pt.ParsedFileLoadFailed):  # noqa
         return f"Failed to load parsed file from disk at {self.path}: {self.exc}"
 
 
-@dataclass
-class PartialParseSaveFileNotFound(InfoLevel, pt.PartialParseSaveFileNotFound):
-    def code(self):
-        return "I030"
-
-    def message(self) -> str:
-        return "Partial parse save file not found. Starting full parse."
+# Skipped I030
 
 
 @dataclass
@@ -1255,84 +1142,15 @@ class PartialParsingEnabled(DebugLevel, pt.PartialParsingEnabled):
 
 
 @dataclass
-class PartialParsingAddedFile(DebugLevel, pt.PartialParsingAddedFile):
+class PartialParsingFile(DebugLevel, pt.PartialParsingFile):
     def code(self):
         return "I041"
 
     def message(self) -> str:
-        return f"Partial parsing: added file: {self.file_id}"
+        return f"Partial parsing: {self.operation} file: {self.file_id}"
 
 
-@dataclass
-class PartialParsingDeletedFile(DebugLevel, pt.PartialParsingDeletedFile):
-    def code(self):
-        return "I042"
-
-    def message(self) -> str:
-        return f"Partial parsing: deleted file: {self.file_id}"
-
-
-@dataclass
-class PartialParsingUpdatedFile(DebugLevel, pt.PartialParsingUpdatedFile):
-    def code(self):
-        return "I043"
-
-    def message(self) -> str:
-        return f"Partial parsing: updated file: {self.file_id}"
-
-
-@dataclass
-class PartialParsingNodeMissingInSourceFile(DebugLevel, pt.PartialParsingNodeMissingInSourceFile):
-    def code(self):
-        return "I044"
-
-    def message(self) -> str:
-        return f"Partial parsing: nodes list not found in source_file {self.file_id}"
-
-
-@dataclass
-class PartialParsingMissingNodes(DebugLevel, pt.PartialParsingMissingNodes):
-    def code(self):
-        return "I045"
-
-    def message(self) -> str:
-        return f"No nodes found for source file {self.file_id}"
-
-
-@dataclass
-class PartialParsingChildMapMissingUniqueID(DebugLevel, pt.PartialParsingChildMapMissingUniqueID):
-    def code(self):
-        return "I046"
-
-    def message(self) -> str:
-        return f"Partial parsing: {self.unique_id} not found in child_map"
-
-
-@dataclass
-class PartialParsingUpdateSchemaFile(DebugLevel, pt.PartialParsingUpdateSchemaFile):
-    def code(self):
-        return "I047"
-
-    def message(self) -> str:
-        return f"Partial parsing: update schema file: {self.file_id}"
-
-
-@dataclass
-class PartialParsingDeletedSource(DebugLevel, pt.PartialParsingDeletedSource):
-    def code(self):
-        return "I048"
-
-    def message(self) -> str:
-        return f"Partial parsing: deleted source {self.unique_id}"
-
-
-@dataclass
-class PartialParsingDeletedExposure(DebugLevel, pt.PartialParsingDeletedExposure):
-    def code(self):
-        return "I049"
-
-    def message(self) -> str:
-        return f"Partial parsing: deleted exposure {self.unique_id}"
+# Skipped I042, I043, I044, I045, I046, I047, I048, I049
 
 
 @dataclass
@@ -1906,6 +1724,7 @@ class LogTestResult(DynamicLevel, pt.LogTestResult):
     @classmethod
     def status_to_level(cls, status):
         # The statuses come from TestStatus
+        # TODO should this return EventLevel enum instead?
         level_lookup = {
             "fail": "error",
             "pass": "info",
@@ -2035,6 +1854,7 @@ class LogFreshnessResult(DynamicLevel, pt.LogFreshnessResult):
     @classmethod
     def status_to_level(cls, status):
         # The statuses come from FreshnessStatus
+        # TODO should this return EventLevel enum instead?
         level_lookup = {
             "runtime error": "error",
             "pass": "info",
@@ -2075,7 +1895,7 @@ class NodeStart(DebugLevel, pt.NodeStart):
         return "Q024"
 
     def message(self) -> str:
-        return f"Began running node {self.unique_id}"
+        return f"Began running node {self.node_info.unique_id}"
 
 
 @dataclass
@@ -2084,7 +1904,7 @@ class NodeFinished(DebugLevel, pt.NodeFinished):
         return "Q025"
 
     def message(self) -> str:
-        return f"Finished running node {self.unique_id}"
+        return f"Finished running node {self.node_info.unique_id}"
 
 
 @dataclass
@@ -2110,13 +1930,7 @@ class ConcurrencyLine(InfoLevel, pt.ConcurrencyLine):  # noqa
         return f"Concurrency: {self.num_threads} threads (target='{self.target_name}')"
 
 
-@dataclass
-class CompilingNode(DebugLevel, pt.CompilingNode):
-    def code(self):
-        return "Q028"
-
-    def message(self) -> str:
-        return f"Compiling {self.unique_id}"
+# Skipped Q028
 
 
 @dataclass
@@ -2125,7 +1939,7 @@ class WritingInjectedSQLForNode(DebugLevel, pt.WritingInjectedSQLForNode):
         return "Q029"
 
     def message(self) -> str:
-        return f'Writing injected SQL for node "{self.unique_id}"'
+        return f'Writing injected SQL for node "{self.node_info.unique_id}"'
 
 
 @dataclass
@@ -2134,7 +1948,7 @@ class NodeCompiling(DebugLevel, pt.NodeCompiling):
         return "Q030"
 
     def message(self) -> str:
-        return f"Began compiling node {self.unique_id}"
+        return f"Began compiling node {self.node_info.unique_id}"
 
 
 @dataclass
@@ -2143,7 +1957,7 @@ class NodeExecuting(DebugLevel, pt.NodeExecuting):
         return "Q031"
 
     def message(self) -> str:
-        return f"Began executing node {self.unique_id}"
+        return f"Began executing node {self.node_info.unique_id}"
 
 
 @dataclass
@@ -2383,7 +2197,7 @@ class TimingInfoCollected(DebugLevel, pt.TimingInfoCollected):
         return "Z010"
 
     def message(self) -> str:
-        return "finished collecting timing info"
+        return f"Timing info for {self.node_info.unique_id} ({self.timing_info.name}): {self.timing_info.started_at} => {self.timing_info.completed_at}"
 
 
 # This prints the stack trace at the debug level while allowing just the nice exception message
@@ -2394,7 +2208,7 @@ class LogDebugStackTrace(DebugLevel, pt.LogDebugStackTrace):  # noqa
         return "Z011"
 
     def message(self) -> str:
-        return ""
+        return f"{self.exc_info}"
 
 
 # We don't write "clean" events to the log, because the clean command
@@ -2698,18 +2512,6 @@ class TrackingInitializeFailure(DebugLevel, pt.TrackingInitializeFailure):  # no
 
     def message(self) -> str:
         return "Got an exception trying to initialize tracking"
-
-
-@dataclass
-class EventBufferFull(WarnLevel, pt.EventBufferFull):
-    def code(self):
-        return "Z045"
-
-    def message(self) -> str:
-        return (
-            "Internal logging/event buffer full."
-            "Earliest logs/events will be dropped as new ones are fired (FIFO)."
-        )
 
 
 # this is the message from the result object

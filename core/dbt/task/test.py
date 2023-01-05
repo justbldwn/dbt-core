@@ -5,15 +5,12 @@ from dbt.utils import _coerce_decimal
 from dbt.events.format import pluralize
 from dbt.dataclass_schema import dbtClassMixin
 import threading
-from typing import Union
 
 from .compile import CompileRunner
 from .run import RunTask
 
-from dbt.contracts.graph.compiled import (
-    CompiledSingularTestNode,
-    CompiledGenericTestNode,
-    CompiledTestNode,
+from dbt.contracts.graph.nodes import (
+    TestNode,
 )
 from dbt.contracts.graph.manifest import Manifest
 from dbt.contracts.results import TestStatus, PrimitiveDict, RunResult
@@ -24,7 +21,11 @@ from dbt.events.types import (
     LogTestResult,
     LogStartLine,
 )
-from dbt.exceptions import InternalException, invalid_bool_error, missing_materialization
+from dbt.exceptions import (
+    InternalException,
+    InvalidBoolean,
+    MissingMaterialization,
+)
 from dbt.graph import (
     ResourceTypeSelector,
 )
@@ -50,7 +51,7 @@ class TestResultData(dbtClassMixin):
             try:
                 return bool(strtobool(field))  # type: ignore
             except ValueError:
-                raise invalid_bool_error(field, "get_test_sql")
+                raise InvalidBoolean(field, "get_test_sql")
 
         # need this so we catch both true bools and 0/1
         return bool(field)
@@ -91,7 +92,7 @@ class TestRunner(CompileRunner):
         self.print_start_line()
 
     def execute_test(
-        self, test: Union[CompiledSingularTestNode, CompiledGenericTestNode], manifest: Manifest
+        self, test: TestNode, manifest: Manifest
     ) -> TestResultData:
         context = generate_runtime_model_context(test, self.config, manifest)
 
@@ -100,7 +101,7 @@ class TestRunner(CompileRunner):
         )
 
         if materialization_macro is None:
-            missing_materialization(test, self.adapter.type())
+            raise MissingMaterialization(model=test, adapter_type=self.adapter.type())
 
         if "config" not in context:
             raise InternalException(
@@ -139,7 +140,7 @@ class TestRunner(CompileRunner):
         TestResultData.validate(test_result_dct)
         return TestResultData.from_dict(test_result_dct)
 
-    def execute(self, test: CompiledTestNode, manifest: Manifest):
+    def execute(self, test: TestNode, manifest: Manifest):
         result = self.execute_test(test, manifest)
 
         severity = test.config.severity.upper()

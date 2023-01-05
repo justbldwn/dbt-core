@@ -49,6 +49,7 @@ class TestExitCodes(BaseConfigProject):
         assert len(results) == 7
 
     def test_snapshot_pass(self, project):
+        run_dbt(["run", "--model", "good"])
         results = run_dbt(['snapshot'])
         assert len(results) == 1
         check_table_does_exist(project.adapter, 'good_snapshot')
@@ -98,7 +99,7 @@ class TestExitCodesDepsFail:
         }
 
     def test_deps_fail(self, project):
-        with pytest.raises(dbt.exceptions.InternalException) as exc:
+        with pytest.raises(dbt.exceptions.GitCheckoutError) as exc:
             run_dbt(['deps'])
         expected_msg = "Error checking out spec='bad-branch'"
         assert expected_msg in str(exc.value)
