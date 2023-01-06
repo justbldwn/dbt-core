@@ -45,7 +45,7 @@ def get_counts(flat_nodes) -> str:
 
 
 def interpret_run_result(result) -> str:
-    if result.status in (NodeStatus.Error, NodeStatus.Fail):
+    if result.status in (NodeStatus.Error, NodeStatus.Fail, NodeStatus.RuntimeErr):
         return "error"
     elif result.status == NodeStatus.Skipped:
         return "skip"
