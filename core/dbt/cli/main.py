@@ -224,7 +224,7 @@ def add(ctx, **kwargs):
 
 
 # dbt deps update
-@deps.command("add")
+@deps.command("update")
 @click.pass_context
 @p.package_name
 @p.package_version
@@ -234,13 +234,21 @@ def update(ctx, **kwargs):
     click.echo(f"`{inspect.stack()[0][3]}` called\n flags: {flags}")
 
 
-# dbt deps update
+# dbt deps remove
 @deps.command("remove")
 @click.pass_context
 @p.package_name
 @p.package_version
 @p.package_location
 def remove(ctx, **kwargs):
+    flags = Flags()
+    click.echo(f"`{inspect.stack()[0][3]}` called\n flags: {flags}")
+
+
+# dbt deps install
+@deps.command("install")
+@click.pass_context
+def install(ctx, **kwargs):
     flags = Flags()
     click.echo(f"`{inspect.stack()[0][3]}` called\n flags: {flags}")
 
