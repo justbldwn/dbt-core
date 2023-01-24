@@ -453,14 +453,14 @@ def _build_debug_subparser(subparsers, base_subparser):
     return sub
 
 
-def _build_deps_subparser(subparsers, base_subparser):
-    docs_sub = subparsers.add_parser(
+def _build_deps_subparser(subparsers):
+    deps_sub = subparsers.add_parser(
         "deps",
         help="""
         Add, update, remove, or install dependencies found in packages.yml.
         """,
     )
-    return docs_sub
+    return deps_sub
 
 
 def _build_deps_install_subparser(subparsers, base_subparser):
@@ -1237,8 +1237,7 @@ def parse_args(args, cls=DBTArgumentParser):
     _build_clean_subparser(subs, base_subparser)
     _build_debug_subparser(subs, base_subparser)
 
-    # _build_deps_subparser(subs, base_subparser)
-    deps_sub = _build_deps_subparser(subs, base_subparser)
+    deps_sub = _build_deps_subparser(subs)
     deps_subs = deps_sub.add_subparsers(title="Available sub-commands when running `dbt deps`")
     _build_deps_add_subparser(deps_subs, base_subparser)
     _build_deps_update_subparser(deps_subs, base_subparser)
