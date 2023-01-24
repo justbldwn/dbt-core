@@ -162,6 +162,23 @@ output_path = click.option(
     default=PurePath.joinpath(Path.cwd(), "target/sources.json"),
 )
 
+package_name = click.option(
+    "--package/--package-name", help="Name of package to install.", type=click.STRING
+)
+
+package_version = click.option(
+    "--version/--package-version",
+    help="Package version to install, if not, grab latest from dbt hub.",
+    type=click.STRING,
+)
+
+package_location = click.option(
+    "--location/--package-location",
+    default="package",
+    type=click.Choice(["package", "git", "local"]),
+    help="Location to download package from, must be one of package, git, or local.",
+)
+
 parse_only = click.option(
     "--parse-only",
     envvar=None,

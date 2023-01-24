@@ -200,7 +200,8 @@ def debug(ctx, **kwargs):
 
 
 # dbt deps
-@cli.command("deps")
+# @cli.command("deps")
+@cli.group()
 @click.pass_context
 @p.profile
 @p.profiles_dir
@@ -209,6 +210,37 @@ def debug(ctx, **kwargs):
 @p.vars
 def deps(ctx, **kwargs):
     """Pull the most recent version of the dependencies listed in packages.yml"""
+
+
+# dbt deps add
+@deps.command("add")
+@click.pass_context
+@p.package_name
+@p.package_version
+@p.package_location
+def add(ctx, **kwargs):
+    flags = Flags()
+    click.echo(f"`{inspect.stack()[0][3]}` called\n flags: {flags}")
+
+
+# dbt deps update
+@deps.command("add")
+@click.pass_context
+@p.package_name
+@p.package_version
+@p.package_location
+def update(ctx, **kwargs):
+    flags = Flags()
+    click.echo(f"`{inspect.stack()[0][3]}` called\n flags: {flags}")
+
+
+# dbt deps update
+@deps.command("remove")
+@click.pass_context
+@p.package_name
+@p.package_version
+@p.package_location
+def remove(ctx, **kwargs):
     flags = Flags()
     click.echo(f"`{inspect.stack()[0][3]}` called\n flags: {flags}")
 

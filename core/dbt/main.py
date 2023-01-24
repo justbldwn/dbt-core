@@ -454,15 +454,82 @@ def _build_debug_subparser(subparsers, base_subparser):
 
 
 def _build_deps_subparser(subparsers, base_subparser):
-    sub = subparsers.add_parser(
+    docs_sub = subparsers.add_parser(
         "deps",
+        help="""
+        Add, update, remove, or install dependencies found in packages.yml.
+        """,
+    )
+    return docs_sub
+
+
+def _build_deps_install_subparser(subparsers, base_subparser):
+    sub = subparsers.add_parser(
+        "install",
         parents=[base_subparser],
         help="""
-        Pull the most recent version of the dependencies listed in packages.yml
+        Install the most recent version of the dependencies listed in packages.yml
         """,
     )
     sub.set_defaults(cls=deps_task.DepsTask, which="deps", rpc_method="deps")
     return sub
+
+
+def _build_deps_add_subparser(subparsers, base_subparser):
+    add_sub = subparsers.add_parser(
+        "add", parents=[base_subparser], help="Add a package to packages.yml"
+    )
+
+    add_sub.add_argument("--package", help="Name of package to add to packages.yml.")
+
+    add_sub.add_argument("--version", help="Version of the package to install.")
+
+    add_sub.add_argument(
+        "--location",
+        choices=["package", "git", "local"],
+        default="package",
+        help="Location to download page from, must be one of package, git, or local. Defaults to package.",
+    )
+
+    return add_sub
+
+
+def _build_deps_update_subparser(subparsers, base_subparser):
+    update_sub = subparsers.add_parser(
+        "update", parents=[base_subparser], help="Update a package in packages.yml"
+    )
+
+    update_sub.add_argument(
+        "--package",
+        help="Name of package to update in packages.yml.",
+    )
+
+    update_sub.add_argument(
+        "--version",
+        help="Version of the package to update to.",
+    )
+
+    update_sub.add_argument(
+        "--location",
+        choices=["package", "git", "local"],
+        default="package",
+        help="Location to download page from, must be one of package, git, or local. Defaults to package.",
+    )
+
+    return update_sub
+
+
+def _build_deps_remove_subparser(subparsers, base_subparser):
+    remove_sub = subparsers.add_parser(
+        "remove", parents=[base_subparser], help="Remove a package from packages.yml"
+    )
+
+    remove_sub.add_argument(
+        "--package",
+        help="Name of package to remove from packages.yml.",
+    )
+
+    return remove_sub
 
 
 def _build_snapshot_subparser(subparsers, base_subparser):
@@ -1169,7 +1236,15 @@ def parse_args(args, cls=DBTArgumentParser):
     _build_init_subparser(subs, base_subparser)
     _build_clean_subparser(subs, base_subparser)
     _build_debug_subparser(subs, base_subparser)
-    _build_deps_subparser(subs, base_subparser)
+
+    # _build_deps_subparser(subs, base_subparser)
+    deps_sub = _build_deps_subparser(subs, base_subparser)
+    deps_subs = deps_sub.add_subparsers(title="Available sub-commands when running `dbt deps`")
+    _build_deps_add_subparser(deps_subs, base_subparser)
+    _build_deps_update_subparser(deps_subs, base_subparser)
+    _build_deps_remove_subparser(deps_subs, base_subparser)
+    _build_deps_install_subparser(deps_subs, base_subparser)
+
     _build_list_subparser(subs, base_subparser)
 
     build_sub = _build_build_subparser(subs, base_subparser)
